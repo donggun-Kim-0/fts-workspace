@@ -12,11 +12,13 @@ type FranchiseDashboardViewProps = {
     state: CreateFranchiseState,
     formData: FormData,
   ) => Promise<CreateFranchiseState>;
+  dbError?: string;
 };
 
 export default function FranchiseDashboardView({
   franchises,
   createAction,
+  dbError,
 }: FranchiseDashboardViewProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
 
@@ -102,6 +104,16 @@ export default function FranchiseDashboardView({
         </aside>
 
         <div className="min-w-0 flex-1 space-y-6">
+          {dbError && (
+            <div
+              role="alert"
+              className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+            >
+              <p className="font-semibold">데이터베이스 연결 안내</p>
+              <p className="mt-1">{dbError}</p>
+            </div>
+          )}
+
           <header className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>

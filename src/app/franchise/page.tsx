@@ -5,6 +5,12 @@ import { getFranchises } from "@/domains/franchise/queries/getFranchises";
 export const dynamic = "force-dynamic";
 
 export default async function FranchisePage() {
-  const franchises = await getFranchises();
-  return <FranchiseDashboardView franchises={franchises} createAction={createFranchise} />;
+  const { franchises, error } = await getFranchises();
+  return (
+    <FranchiseDashboardView
+      franchises={franchises}
+      createAction={createFranchise}
+      dbError={error}
+    />
+  );
 }
