@@ -63,7 +63,7 @@ export default function FranchiseDashboardView({
       tone: "bg-amber-50 text-amber-700",
     },
     {
-      label: "이번 달 이슈 매장",
+      label: "이슈 매장",
       value: `${summary.suspended}`,
       delta: "+1건 신규",
       icon: (
@@ -78,7 +78,7 @@ export default function FranchiseDashboardView({
   return (
     <section className="min-h-screen bg-slate-50">
       <div className="mx-auto flex max-w-[1500px] gap-6 p-4 sm:p-6 lg:p-8">
-        <aside className="hidden w-64 shrink-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:block">
+        <aside className="hidden w-64 shrink-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm lg:block">
           <div className="mb-6 rounded-xl bg-blue-600 px-4 py-3 text-white">
             <p className="text-xs text-blue-100">FTS Control Center</p>
             <p className="mt-1 text-sm font-semibold">프랜차이즈 통합 관제</p>
@@ -102,7 +102,7 @@ export default function FranchiseDashboardView({
         </aside>
 
         <div className="min-w-0 flex-1 space-y-6">
-          <header className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <header className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h1 className="text-2xl font-semibold text-slate-900">가맹점 DB 관리 대시보드</h1>
@@ -122,7 +122,7 @@ export default function FranchiseDashboardView({
 
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {kpis.map((kpi) => (
-              <article key={kpi.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <article key={kpi.label} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-sm text-slate-500">{kpi.label}</p>
@@ -136,7 +136,7 @@ export default function FranchiseDashboardView({
           </div>
 
           <div className="grid gap-4 xl:grid-cols-3">
-            <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-2">
+            <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-2">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-base font-semibold text-slate-900">지역별 매출 현황</h2>
                 <span className="text-xs text-slate-400">차트 연동 예정</span>
@@ -146,7 +146,7 @@ export default function FranchiseDashboardView({
               </div>
             </article>
 
-            <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
               <h2 className="text-base font-semibold text-slate-900">AI 가맹점 총평 분석</h2>
               <div className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
                 <p>
@@ -163,7 +163,7 @@ export default function FranchiseDashboardView({
             </article>
           </div>
 
-          <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+          <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-base font-semibold text-slate-900">가맹점 DB 테이블</h2>
               <button
@@ -181,7 +181,7 @@ export default function FranchiseDashboardView({
 
       {isFormOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 p-4 backdrop-blur-[1px]">
-          <div className="w-full max-w-2xl rounded-2xl bg-white p-4 shadow-xl sm:p-6">
+          <div className="w-full max-w-2xl rounded-xl bg-white p-4 shadow-xl sm:p-6">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-slate-900">신규 가맹점 등록</h3>
               <button
