@@ -1,6 +1,8 @@
 import FranchiseDashboardView from "@/domains/franchise/components/FranchiseDashboardView";
+import { createFranchise } from "@/domains/franchise/actions/createFranchise";
+import { getFranchises } from "@/domains/franchise/queries/getFranchises";
 
-export default function FranchisePage() {
-  // Thin Controller: 화면 로직은 도메인 컴포넌트에 위임
-  return <FranchiseDashboardView />;
+export default async function FranchisePage() {
+  const franchises = await getFranchises();
+  return <FranchiseDashboardView franchises={franchises} createAction={createFranchise} />;
 }

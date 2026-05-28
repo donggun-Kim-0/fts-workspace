@@ -5,7 +5,7 @@ export interface Franchise {
   code: string;
   name: string;
   status: FranchiseStatus;
-  ownerName?: string;
+  contact?: string | null;
   openedAt?: string | null;
   createdAt: string;
   updatedAt: string;
