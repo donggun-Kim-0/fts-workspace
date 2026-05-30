@@ -1,5 +1,17 @@
 # 배포 가이드 (Vercel + Render)
 
+## ⚠️ Vercel 빌드 실패 시 (No Next.js version detected)
+
+모노레포이므로 Vercel **Root Directory**를 반드시 `frontend`로 설정하세요.
+
+1. Vercel Dashboard → 프로젝트 → **Settings → General**
+2. **Root Directory** → `frontend` 입력 → Save
+3. **Redeploy** 실행
+
+자세한 환경 변수: [frontend/VERCEL.md](./frontend/VERCEL.md)
+
+---
+
 프론트엔드(Next.js)는 **Vercel**, 백엔드(NestJS)와 DB(PostgreSQL)는 **Render** 등에 분리 배포합니다.
 
 ## 아키텍처
