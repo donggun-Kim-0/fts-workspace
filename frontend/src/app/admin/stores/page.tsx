@@ -70,7 +70,6 @@ export default function AdminStoresPage() {
           },
           options?.signal,
         );
-        if (options?.signal?.aborted) return;
         setStores(result.data);
         setMeta(result.meta);
         setListError(null);
@@ -84,7 +83,7 @@ export default function AdminStoresPage() {
             : '가맹점 목록을 불러오지 못했습니다.',
         );
       } finally {
-        setIsLoading(false);
+        if (!options?.silent) setIsLoading(false);
       }
     },
     [debouncedSearch, statusFilter, page],
@@ -105,14 +104,44 @@ export default function AdminStoresPage() {
   }, []);
 
   useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch, statusFilter]);
-
-  useEffect(() => {
     const controller = new AbortController();
-    void fetchStores({ signal: controller.signal });
-    return () => controller.abort();
-  }, [fetchStores]);
+    let cancelled = false;
+
+    (async () => {
+      setIsLoading(true);
+      setListError(null);
+      try {
+        const result = await listStores(
+          {
+            search: debouncedSearch || undefined,
+            status: statusFilter || undefined,
+            page,
+            limit: PAGE_LIMIT,
+          },
+          controller.signal,
+        );
+        if (cancelled) return;
+        setStores(result.data);
+        setMeta(result.meta);
+      } catch (err) {
+        if (cancelled || axios.isCancel(err) || (err instanceof Error && err.name === 'AbortError')) {
+          return;
+        }
+        setListError(
+          err instanceof Error
+            ? err.message
+            : '가맹점 목록을 불러오지 못했습니다.',
+        );
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [debouncedSearch, statusFilter, page]);
 
   const openCreate = () => {
     setEditingId(null);
@@ -211,7 +240,10 @@ export default function AdminStoresPage() {
             <input
               type="search"
               value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              onChange={(e) => {
+                setSearchInput(e.target.value);
+                setPage(1);
+              }}
               placeholder="지점명 또는 지점코드 검색"
               className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
@@ -223,7 +255,10 @@ export default function AdminStoresPage() {
           </div>
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
             className="rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:w-44"
           >
             <option value="">전체 상태</option>

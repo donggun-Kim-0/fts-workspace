@@ -5,7 +5,21 @@ export function getApiBase(): string {
   return getPublicApiUrl();
 }
 
-/** NestJS REST API용 axios 인스턴스 — baseURL은 요청 시점에 resolve (터널·외부 접속 대응) */
+/**
+ * axios는 url이 `/`로 시작하면 baseURL을 무시함.
+ * `/backend` + `/stores` → `/stores`(404) 되는 문제를 방지.
+ */
+export function joinApiPath(base: string, path: string): string {
+  const normalizedBase = base.replace(/\/$/, '');
+  const normalizedPath = path.replace(/^\//, '');
+  if (!normalizedPath) return normalizedBase || '/';
+  if (!normalizedBase) return `/${normalizedPath}`;
+  if (/^https?:\/\//i.test(normalizedBase)) {
+    return `${normalizedBase}/${normalizedPath}`;
+  }
+  return `${normalizedBase}/${normalizedPath}`;
+}
+
 export const apiClient = axios.create({
   withCredentials: false,
   headers: {
@@ -13,11 +27,6 @@ export const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
   timeout: 30_000,
-});
-
-apiClient.interceptors.request.use((config) => {
-  config.baseURL = getPublicApiUrl();
-  return config;
 });
 
 export class ApiError extends Error {
@@ -43,7 +52,8 @@ export async function apiRequest<T>(
   path: string,
   config: AxiosRequestConfig = {},
 ): Promise<T> {
-  const url = path.startsWith('/') ? path : `/${path}`;
+  const apiBase = getPublicApiUrl();
+  const url = joinApiPath(apiBase, path);
 
   try {
     const res = await apiClient.request<T>({
@@ -61,7 +71,6 @@ export async function apiRequest<T>(
     const ax = err as AxiosError<{ message?: string | string[] }>;
     const status = ax.response?.status ?? 0;
     const body = ax.response?.data;
-    const apiBase = getPublicApiUrl();
 
     if (!ax.response) {
       throw new ApiError(
