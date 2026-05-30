@@ -10,9 +10,13 @@
     "build": "npm run build --prefix backend && npm run build --prefix frontend",
     "build:frontend": "npm run build --prefix frontend",
     "build:backend": "npm run build --prefix backend",
+    "vercel-build": "npm install --prefix frontend && npm run build --prefix frontend",
     "lint": "npm run lint --prefix frontend",
     "db:up": "docker compose -f backend/docker-compose.yml up -d",
     "db:push": "npm exec --prefix backend prisma db push",
     "db:generate": "npm exec --prefix backend prisma generate"
+  },
+  "dependencies": {
+    "next": "16.2.6"
   }
 }
