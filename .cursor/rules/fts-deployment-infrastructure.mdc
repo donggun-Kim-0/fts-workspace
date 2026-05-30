@@ -1,0 +1,56 @@
+---
+description: FTS Vercel·Render 배포 환경 절대 규칙 (API 프록시, Node 20, Prisma, env)
+alwaysApply: true
+---
+
+# FTS 인프라 및 배포 절대 규칙
+
+코드 작성·수정 시 아래를 **최우선** 준수한다. 위배 코드를 제안하지 않는다.
+
+## 1. 네트워크 및 프록시
+
+- **아키텍처**: 프론트 Vercel · 백엔드 Render · DB Render PostgreSQL (완전 분리).
+- 프론트 API 호출에 `http://localhost:4000`, `127.0.0.1:4000` 등 **절대 URL 하드코딩 금지**.
+- 브라우저 기본 경로: **`/backend/...`** (상대 경로). `NEXT_PUBLIC_API_URL=/backend` 로 관리.
+- 서버(rewrite) 대상: `BACKEND_INTERNAL_URL` = Render NestJS URL (로컬은 `http://127.0.0.1:4000`).
+- axios: `url`이 `/`로 시작하면 baseURL 무시됨 → `joinApiPath()` (`frontend/src/lib/api/client.ts`) 사용.
+- 환경 로직: `frontend/src/lib/env-config.ts` — `getPublicApiUrl()`, `getBackendInternalUrl()`.
+
+```typescript
+// ❌ BAD
+axios.get('http://localhost:4000/stores');
+fetch(`${process.env.NEXT_PUBLIC_API_URL}/stores`); // url='/stores' 단독
+
+// ✅ GOOD
+// NEXT_PUBLIC_API_URL=/backend → joinApiPath → '/backend/stores'
+import { apiRequest } from '@/lib/api/client';
+await apiRequest('/stores');
+```
+
+## 2. Node.js 엔진
+
+- `frontend/package.json`의 `"engines": { "node": ">=20.0.0" }` **삭제·다운그레이드 금지**.
+- 패키지 추가/업데이트 시 **Node 20.x** 호환 버전만 사용 (Prisma 초기화 오류 방지).
+
+## 3. 데이터베이스 (Prisma)
+
+- **DB 접근은 backend(Render)만** — 프론트에서 Prisma·`DATABASE_URL` 직접 사용 금지.
+- `DATABASE_URL`: Render **External Database URL** (`?sslmode=require`). 설정 위치:
+  - 로컬: `backend/.env`
+  - Render: Web Service 환경 변수
+- 로컬 `backend/.env.example` ↔ Render env 구조를 맞춘다.
+
+## 4. 환경 변수 안내 의무
+
+새 env가 생기면 작업자에게 **반드시** 안내:
+
+| 대상 | 예시 |
+|------|------|
+| **Vercel** (frontend) | `NEXT_PUBLIC_API_URL`, `BACKEND_INTERNAL_URL`, `KAKAO_REST_API_KEY` |
+| **Render** (backend) | `DATABASE_URL`, `FRONTEND_ORIGINS`, `ALLOW_VERCEL_PREVIEW` |
+
+문구 예: *「Vercel Project Settings → Environment Variables에 `XXX`를 동일하게 추가하세요.」*
+
+## 5. 참고 문서
+
+- `DEPLOYMENT.md`, `frontend/VERCEL.md`, `docs/TUNNEL-TROUBLESHOOTING.md`

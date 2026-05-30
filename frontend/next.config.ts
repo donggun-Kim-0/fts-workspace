@@ -1,11 +1,14 @@
 import type { NextConfig } from 'next';
 import path from 'path';
+import { getBackendInternalUrl } from './src/lib/env-config';
 
-/** NestJS API URL — rewrite 대상 (절대 `/backend` 같은 상대 경로 사용 금지) */
-function getBackendInternalUrl(): string {
-  const url = process.env.BACKEND_INTERNAL_URL?.replace(/\/$/, '');
-  if (url && /^https?:\/\//i.test(url)) return url;
-  return 'http://127.0.0.1:4000';
+const backendInternalUrl = getBackendInternalUrl();
+
+if (process.env.NODE_ENV === 'production' && !process.env.BACKEND_INTERNAL_URL) {
+  console.warn(
+    '[next.config] BACKEND_INTERNAL_URL이 없습니다. Vercel Settings에 Render API URL을 설정하세요. 현재 rewrite 대상:',
+    backendInternalUrl,
+  );
 }
 
 const nextConfig: NextConfig = {
@@ -16,11 +19,10 @@ const nextConfig: NextConfig = {
   },
   poweredByHeader: false,
   async rewrites() {
-    const backendUrl = getBackendInternalUrl();
     return [
       {
         source: '/backend/:path*',
-        destination: `${backendUrl}/:path*`,
+        destination: `${backendInternalUrl}/:path*`,
       },
     ];
   },

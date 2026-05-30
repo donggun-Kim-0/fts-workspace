@@ -1,8 +1,12 @@
 import axios, { type AxiosError, type AxiosRequestConfig } from 'axios';
-import { getPublicApiUrl } from '@/env.public';
+import {
+  API_PROXY_PREFIX,
+  getPublicApiUrl,
+  resolveBrowserApiUrl,
+} from '@/lib/env-config';
 
 export function getApiBase(): string {
-  return getPublicApiUrl();
+  return resolveBrowserApiUrl(getPublicApiUrl());
 }
 
 /**
@@ -10,10 +14,11 @@ export function getApiBase(): string {
  * `/backend` + `/stores` → `/stores`(404) 되는 문제를 방지.
  */
 export function joinApiPath(base: string, path: string): string {
-  const normalizedBase = base.replace(/\/$/, '');
+  const safeBase = resolveBrowserApiUrl(base);
+  const normalizedBase = safeBase.replace(/\/$/, '');
   const normalizedPath = path.replace(/^\//, '');
-  if (!normalizedPath) return normalizedBase || '/';
-  if (!normalizedBase) return `/${normalizedPath}`;
+  if (!normalizedPath) return normalizedBase || API_PROXY_PREFIX;
+  if (!normalizedBase) return `${API_PROXY_PREFIX}/${normalizedPath}`;
   if (/^https?:\/\//i.test(normalizedBase)) {
     return `${normalizedBase}/${normalizedPath}`;
   }
@@ -52,7 +57,7 @@ export async function apiRequest<T>(
   path: string,
   config: AxiosRequestConfig = {},
 ): Promise<T> {
-  const apiBase = getPublicApiUrl();
+  const apiBase = getApiBase();
   const url = joinApiPath(apiBase, path);
 
   try {
@@ -73,10 +78,11 @@ export async function apiRequest<T>(
     const body = ax.response?.data;
 
     if (!ax.response) {
-      throw new ApiError(
-        `백엔드(${apiBase})에 연결할 수 없습니다. API 서버가 실행 중인지 확인하세요.`,
-        0,
-      );
+      const hint =
+        apiBase === API_PROXY_PREFIX
+          ? `${API_PROXY_PREFIX} 프록시 → BACKEND_INTERNAL_URL(Render API) 연결 실패`
+          : `백엔드(${apiBase}) 연결 실패`;
+      throw new ApiError(`${hint}. API 서버·환경변수를 확인하세요.`, 0);
     }
 
     throw new ApiError(
