@@ -1,0 +1,14 @@
+version: '3.8'
+
+# 로컬 개발 전용 PostgreSQL — 프로덕션은 Render 등 클라우드 DB 사용
+# DATABASE_URL은 backend/.env 에서 클라우드 엔드포인트로 교체
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: fts_db
+    environment:
+      POSTGRES_USER: fts_user
+      POSTGRES_PASSWORD: secure_password
+      POSTGRES_DB: fts_prod
+    ports:
+      - "5432:5432"

@@ -2,31 +2,17 @@
   "name": "fts-workspace",
   "version": "0.1.0",
   "private": true,
+  "description": "FTS 모노레포 — NestJS backend + Next.js frontend",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "postinstall": "prisma generate"
-  },
-  "dependencies": {
-    "@prisma/adapter-pg": "^7.8.0",
-    "@prisma/client": "^7.8.0",
-    "next": "16.2.6",
-    "pg": "^8.21.0",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "zod": "^4.4.3"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.6",
-    "prisma": "^7.8.0",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "dev": "npm run dev --prefix frontend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "npm run start:dev --prefix backend",
+    "build": "npm run build --prefix backend && npm run build --prefix frontend",
+    "build:frontend": "npm run build --prefix frontend",
+    "build:backend": "npm run build --prefix backend",
+    "lint": "npm run lint --prefix frontend",
+    "db:up": "docker compose -f backend/docker-compose.yml up -d",
+    "db:push": "npm exec --prefix backend prisma db push",
+    "db:generate": "npm exec --prefix backend prisma generate"
   }
 }

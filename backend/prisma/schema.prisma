@@ -1,33 +1,89 @@
+// backend/prisma/schema.prisma
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  // 로컬: docker-compose / 클라우드: Render 등 외부 URL (?sslmode=require)
   url      = env("DATABASE_URL")
 }
 
-model User {
+// 공통 코드 관리 (드롭다운 데이터 등)
+model MasterConfig {
   id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  role      String
+  category  String   // 예: "BRAND", "STORE_STATUS", "REGION", "POS_HW"
+  key       String   // 식별키
+  value     String   // 표시할 값
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 }
 
 model Store {
-  id        Int      @id @default(autoincrement())
-  name      String
-  address   String
-  ownerName String
-  contracts Contract[]
-}
+  id            String   @id @default(uuid())
+  branchCode    String   @unique // 지점코드 (ST-YYYYMMDD-### 자동생성)
+  branchName    String   // 지점명
+  contractBrand String?  // 계약 브랜드
+  status        String   @default("OPEN") // 운영상태 (OPEN, CLOSED, SUSPENDED 등)
+  
+  // --- 식별 및 분류 ---
+  branchType    String?  // 영업 형태 (복합매장, 샵인샵 등)
+  region        String?  // 지자체
+  supervisor    String?  // 담당 SV
 
-model Contract {
-  id        Int      @id @default(autoincrement())
-  type      String
-  fileUrl   String
-  storeId   Int?
-  store     Store?   @relation(fields: [storeId], references: [id])
-  createdAt DateTime @default(now())
+  // --- 사업자 등록 정보 ---
+  bizRegNo      String?  // 사업자등록번호
+  ownerName     String   // 대표자 성함
+  corpRegNo     String?  // 법인등록번호
+  bizName       String?  // 상호명
+  bizType       String?  // 업태
+  bizCategory   String?  // 업종
+  address       String?  // 주소
+
+  // --- 계약 정보 ---
+  disclosureReplyDate DateTime? // 정보공개서 회신일
+  coverageArea        String?   // 보장권역
+  initialContractDate DateTime? // 최초 계약일
+  renewalContractDate DateTime? // 갱신 계약일
+  expireDate          DateTime? // 계약 만료일 (자동계산)
+  terminateNoticeDate DateTime? // 해지 통보일 (자동계산)
+  openedAt            DateTime? // 오픈일
+  franchiseFee        Int?      // 가맹비
+  educationFee        Int?      // 교육비
+  royaltyAmount       Int?      // 로열티 금액
+  royaltyDate         String?   // 로열티 날짜
+  terminateDate       DateTime? // 해지일
+  operationDuration   Int?      // 운영기간 (일수)
+
+  // --- 가맹점/대표자 정보 ---
+  ownerPhone     String?  // 대표자 연락처
+  ownerEmail     String?  // 대표자 이메일
+  ownerBirth     String?  // 대표자 생년월일
+  storePhone     String?  // 매장 연락처
+  managerName    String?  // 매니저 이름
+  managerPhone   String?  // 매니저 연락처
+  homeAddress    String?  // 자택 주소
+  staffCount     Int? @default(0) // 정직원 수
+  partTimeCount  Int? @default(0) // 파트타임 수
+  laborCost      Int? @default(0) // 인건비
+
+  // --- 위치/영업 정보 ---
+  zipCode        String?  // 우편번호
+  latitude       Float?   // 위도
+  longitude      Float?   // 경도
+  marketType     String?  // 상권유형
+  businessHours  String?  // 영업시간
+  breakTime      String?  // 브레이크 타임
+  holidays       Json?    // 휴무일 (배열 형태)
+
+  // --- 인프라 및 플랫폼 정보 (JSONB로 묶어서 유연하게 관리) ---
+  platformInfo   Json?    // 배민, 쿠팡 등 ID/PW/URL 묶음
+  posInfo        Json?    // POS H/W, S/W 정보 묶음
+  tableOrderInfo Json?    // 테이블오더 정보
+  ktServices     Json?    // KT 인터넷/TV/CCTV 정보 (bool)
+  mapUrls        Json?    // 네이버/카카오/구글맵 URL 묶음
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
